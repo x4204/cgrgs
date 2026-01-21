@@ -17,20 +17,14 @@
 #define SW 1000
 #define SH SW
 
-#define GW SW
+#define GW 800
 #define GH GW
-#define GN 1000
+#define GN 100
 #define GPPC ((float)GW / GN)
 
 #define VIS_STEP_ITER 100000
 
-static const int8_t vb[256] = {
-  ['a'] = 1,
-  ['c'] = 1,
-  ['g'] = 1,
-  ['t'] = 1,
-};
-
+static int8_t vb[256] = {0};
 static int32_t vb_cnt = 0;
 static Vector2 bp[256] = {0};
 static Vector2 gp = {0};
@@ -48,6 +42,15 @@ static bool reset_on_next = false;
 static void
 cgr_init(void)
 {
+  // vb['a'] = 1;
+  // vb['c'] = 1;
+  // vb['g'] = 1;
+  // vb['t'] = 1;
+  for (int32_t i = 0; i < 256; i += 1) {
+    // if (isprint(i) || isspace(i)) vb[i] = 1;
+    vb[i] = 1;
+  }
+
   gp.x = (SW - GW) / 2;
   gp.y = (SH - GH) / 2;
 
@@ -120,9 +123,10 @@ cgr_draw_letters(void)
   for (int32_t i = 0; i < 256; i += 1) {
     if (vb[i] == 0) continue;
 
-    char letter[2] = {i, 0};
+    char buf[20] = {0};
+    snprintf(buf, sizeof(buf), "%02x", i);
     Vector2 pos = Vector2Lerp(gc, bp[i], 1.07);
-    DrawText(letter, pos.x - 7.5f, pos.y - 15.0f, 30.0f, GRAY);
+    DrawText(buf, pos.x - 7.5f, pos.y - 15.0f, 10.0f, GRAY);
   }
 }
 
@@ -145,6 +149,7 @@ cgr_vis_step(void)
     if (!data_vis) return;
     if (lerp_factor > 1.0f) return;
     if (data_idx >= data_len) { go_next = true; return; }
+    if (vb[data[data_idx]] == 0) { data_idx += 1; continue; }
 
     pc = Vector2Lerp(pc, bp[data[data_idx]], lerp_factor);
     data_idx += 1;
@@ -190,11 +195,6 @@ cgr_read_sample(char* path)
   }
   assert(read_len != 0);
 
-  for (int32_t i = 0; i < data_len; i += 1) {
-    assert(vb[data[i]] == 1);
-    data[i] = tolower(data[i]);
-  }
-
   close(fd);
 }
 
@@ -222,7 +222,7 @@ main(int argc, char** argv)
     ClearBackground(RAYWHITE);
 
     cgr_vis_step();
-    cgr_draw_lerp_factor();
+    // cgr_draw_lerp_factor();
     cgr_draw_grid();
     cgr_draw_letters();
 
