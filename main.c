@@ -99,14 +99,14 @@ cgr_draw_grid(void)
   float smax = 0.0f;
   for (int32_t y = 0; y < GN; y += 1) {
     for (int32_t x = 0; x < GN; x += 1) {
-      float s = logf((float)gg[y][x]);
+      float s = logf(1.0f + gg[y][x]);
       if (s > smax) smax = s;
     }
   }
 
   for (int32_t y = 0; y < GN; y += 1) {
     for (int32_t x = 0; x < GN; x += 1) {
-      float s = logf((float)gg[y][x]);
+      float s = logf(1.0f + gg[y][x]);
       Color c = BLACK;
       c.a = (uint8_t)(s / smax * 255.0f);
 
