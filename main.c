@@ -22,7 +22,7 @@
 #define GN 200
 #define GPPC ((float)GW / GN)
 
-#define VIS_STEP_ITER 100
+#define VIS_STEP_ITER 1000
 
 static const int8_t vb[256] = {
   ['a'] = 1,
@@ -41,6 +41,9 @@ static uint8_t* data = NULL;
 static int32_t data_len = 0;
 static int32_t data_idx = 0;
 static bool data_vis = false;
+static float lerp_factor = 0.5f;
+static bool go_next = false;
+static bool reset_on_next = false;
 
 static void
 cgr_init(void)
@@ -53,6 +56,7 @@ cgr_init(void)
 
   pc = gc;
 
+  vb_cnt = 0;
   for (int32_t i = 0; i < 256; i += 1) {
     if (vb[i] == 1) vb_cnt += 1;
   }
@@ -67,6 +71,23 @@ cgr_init(void)
     bp[i].x = gc.x + r * cosf(a);
     bp[i].y = gc.y + r * sinf(a);
   }
+
+  for (int32_t y = 0; y < GN; y += 1) {
+    for (int32_t x = 0; x < GN; x += 1) {
+      gg[y][x] = 0;
+    }
+  }
+
+  data_vis = false;
+  data_idx = 0;
+}
+
+static void
+cgr_draw_lerp_factor(void)
+{
+  char buf[20] = {0};
+  snprintf(buf, sizeof(buf), "LF=%.2f", lerp_factor);
+  DrawText(buf, 10, 10, 30, GRAY);
 }
 
 static void
@@ -106,12 +127,24 @@ cgr_draw_letters(void)
 }
 
 static void
+cgr_export_screen(void)
+{
+  static int32_t n = 0;
+  char path[30] = {0};
+  snprintf(path, sizeof(path), "img-%03d.png", n);
+  assert(ExportImage(LoadImageFromScreen(), path));
+  n += 1;
+}
+
+static void
 cgr_vis_step(void)
 {
   for (int32_t i = 0; i < VIS_STEP_ITER; i += 1) {
-    if (!data_vis || data_idx >= data_len) return;
+    if (!data_vis) return;
+    if (lerp_factor > 1.0f) return;
+    if (data_idx >= data_len) { go_next = true; return; }
 
-    pc = Vector2Lerp(pc, bp[data[data_idx]], 0.5);
+    pc = Vector2Lerp(pc, bp[data[data_idx]], lerp_factor);
     data_idx += 1;
 
     Vector2 p = Vector2Subtract(pc, gp);
@@ -187,10 +220,19 @@ main(int argc, char** argv)
     ClearBackground(RAYWHITE);
 
     cgr_vis_step();
+    cgr_draw_lerp_factor();
     cgr_draw_grid();
     cgr_draw_letters();
 
     EndDrawing();
+
+    if (reset_on_next && go_next) {
+      cgr_export_screen();
+      cgr_init();
+      lerp_factor += 0.01f;
+      data_vis = true;
+      go_next = false;
+    }
   }
 
   CloseWindow();
