@@ -68,7 +68,7 @@ cgr_init(void)
     if (vb[i] == 0) continue;
     float s = 360.0f / vb_cnt;
     float r = GW / 2;
-    float a = (135.0f + j * s) * DEG2RAD;
+    float a = (90.0f + s / 2 + j * s) * DEG2RAD;
 
     j += 1;
     bp[i].x = gc.x + r * cosf(a);
