@@ -41,7 +41,7 @@ static uint8_t* data = NULL;
 static int32_t data_len = 0;
 static int32_t data_idx = 0;
 static bool data_vis = false;
-static float lerp_factor = 0.5f;
+static float lerp_factor = 0.01f;
 static bool go_next = false;
 static bool reset_on_next = false;
 
@@ -126,6 +126,8 @@ cgr_draw_letters(void)
   }
 }
 
+// to generate a video out of images:
+// ffmpeg -framerate 10 -pattern_type glob -i 'img-*.png' -c:v libx264 -pix_fmt yuv420p out.mp4
 static void
 cgr_export_screen(void)
 {
