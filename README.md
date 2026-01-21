@@ -9,6 +9,8 @@
 
 See `samples/index.txt` for a list of sequences you can visualize
 
+Press `SPACE` to start the visualization
+
 
 ## References
 
