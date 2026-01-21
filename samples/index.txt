@@ -3,3 +3,7 @@ source: https://www.ncbi.nlm.nih.gov/nuccore/M37467.1
 
   file: n002.txt
 source: https://www.ncbi.nlm.nih.gov/nuccore/U01317.1
+
+  file: n003.txt
+source: https://www.ncbi.nlm.nih.gov/nuccore/CAAGRJ010000001.1
+  note: removed `n`

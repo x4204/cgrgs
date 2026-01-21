@@ -14,15 +14,15 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#define SW 800
+#define SW 1000
 #define SH SW
 
 #define GW SW
 #define GH GW
-#define GN 200
+#define GN 1000
 #define GPPC ((float)GW / GN)
 
-#define VIS_STEP_ITER 1000
+#define VIS_STEP_ITER 100000
 
 static const int8_t vb[256] = {
   ['a'] = 1,
@@ -41,7 +41,7 @@ static uint8_t* data = NULL;
 static int32_t data_len = 0;
 static int32_t data_idx = 0;
 static bool data_vis = false;
-static float lerp_factor = 0.01f;
+static float lerp_factor = 0.5f;
 static bool go_next = false;
 static bool reset_on_next = false;
 
