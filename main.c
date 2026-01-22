@@ -38,6 +38,7 @@ static Vector2 grid_center = {0};
 static int32_t grid_counts[GRID_N][GRID_N] = {0};
 
 static Vector2 point_pos = {0};
+static float jump_ratio = 0.5f;
 
 static void
 cgr_init(void)
@@ -141,7 +142,8 @@ cgr_vis_step(void)
     if (data_idx >= data_len) return;
     if (letter_set[data[data_idx]] == 0) { data_idx += 1; continue; }
 
-    point_pos = Vector2Lerp(point_pos, letter_pos[data[data_idx]], 0.5f);
+    Vector2 attr_pos = letter_pos[data[data_idx]];
+    point_pos = Vector2Lerp(point_pos, attr_pos, jump_ratio);
     data_idx += 1;
 
     Vector2 p = Vector2Subtract(point_pos, grid_pos);
@@ -152,14 +154,21 @@ cgr_vis_step(void)
 }
 
 static void
-cgr_draw_vis_progress(void)
+cgr_draw_debug_info(void)
 {
-  char buf[32] = {0};
-  snprintf(
-    buf, sizeof(buf), "vis: %6.2f%%",
-    (float)data_idx / data_len * 100.0f
-  );
-  DrawText(buf, 10.0f, 10.0f, 20.0f, GRAY);
+  {
+    char buf[32] = {0};
+    snprintf(
+      buf, sizeof(buf), "vis: %6.2f%%",
+      (float)data_idx / data_len * 100.0f
+    );
+    DrawText(buf, 10.0f, 10.0f, 20.0f, GRAY);
+  }
+  {
+    char buf[32] = {0};
+    snprintf(buf, sizeof(buf), "ratio: %4.2f", jump_ratio);
+    DrawText(buf, 10.0f, 30.0f, 20.0f, GRAY);
+  }
 }
 
 static void
@@ -221,6 +230,12 @@ main(int argc, char** argv)
     if (IsKeyPressed(KEY_E)) {
       cgr_export_screen();
     }
+    if (IsKeyPressed(KEY_R)) {
+      if (jump_ratio < 1.0f) {
+        jump_ratio += 0.1f;
+        cgr_init();
+      }
+    }
 
     BeginDrawing();
     ClearBackground(RAYWHITE);
@@ -228,7 +243,7 @@ main(int argc, char** argv)
     cgr_vis_step();
     cgr_draw_grid();
     cgr_draw_letters();
-    cgr_draw_vis_progress();
+    cgr_draw_debug_info();
 
     EndDrawing();
   }
