@@ -14,104 +14,99 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#define SW 1000
-#define SH SW
+#define WINDOW_W 1000
+#define WINDOW_H WINDOW_W
 
-#define GW 800
-#define GH GW
-#define GN 100
-#define GPPC ((float)GW / GN)
+#define GRID_W 800
+#define GRID_H GRID_W
+#define GRID_N 100
+#define GRID_PIXELS_PER_CELL ((float)GRID_W / GRID_N)
 
-#define VIS_STEP_ITER 100000
+#define VIS_STEPS_PER_ITER 100000
 
-static int8_t vb[256] = {0};
-static int32_t vb_cnt = 0;
-static Vector2 bp[256] = {0};
-static Vector2 gp = {0};
-static Vector2 gc = {0};
-static int32_t gg[GN][GN] = {0};
-static Vector2 pc = {0};
 static uint8_t* data = NULL;
 static int32_t data_len = 0;
 static int32_t data_idx = 0;
 static bool data_vis = false;
-static float lerp_factor = 0.5f;
-static bool go_next = false;
-static bool reset_on_next = false;
+
+static Vector2 letter_pos[256] = {0};
+static int8_t letter_set[256] = {0};
+static int32_t letter_set_cnt = 0;
+
+static Vector2 grid_pos = {0};
+static Vector2 grid_center = {0};
+static int32_t grid_counts[GRID_N][GRID_N] = {0};
+
+static Vector2 point_pos = {0};
 
 static void
 cgr_init(void)
 {
-  // vb['a'] = 1;
-  // vb['c'] = 1;
-  // vb['g'] = 1;
-  // vb['t'] = 1;
+  grid_pos.x = (WINDOW_W - GRID_W) / 2;
+  grid_pos.y = (WINDOW_H - GRID_H) / 2;
+
+  grid_center.x = grid_pos.x + GRID_W / 2;
+  grid_center.y = grid_pos.y + GRID_H / 2;
+
+  point_pos = grid_center;
+
   for (int32_t i = 0; i < 256; i += 1) {
-    // if (isprint(i) || isspace(i)) vb[i] = 1;
-    vb[i] = 1;
+    letter_set[i] = 0;
   }
-
-  gp.x = (SW - GW) / 2;
-  gp.y = (SH - GH) / 2;
-
-  gc.x = gp.x + GW / 2;
-  gc.y = gp.y + GH / 2;
-
-  pc = gc;
-
-  vb_cnt = 0;
+  for (int32_t i = 0; i < data_len; i += 1) {
+    letter_set[data[i]] = 1;
+  }
+  letter_set_cnt = 0;
   for (int32_t i = 0; i < 256; i += 1) {
-    if (vb[i] == 1) vb_cnt += 1;
+    if (letter_set[i] == 1) letter_set_cnt += 1;
   }
 
   for (int32_t i = 0, j = 0; i < 256; i += 1) {
-    if (vb[i] == 0) continue;
-    float s = 360.0f / vb_cnt;
-    float r = GW / 2;
+    if (letter_set[i] == 0) continue;
+    float s = 360.0f / letter_set_cnt;
+    float r = GRID_W / 2;
     float a = (90.0f + s / 2 + j * s) * DEG2RAD;
 
     j += 1;
-    bp[i].x = gc.x + r * cosf(a);
-    bp[i].y = gc.y + r * sinf(a);
+    letter_pos[i].x = grid_center.x + r * cosf(a);
+    letter_pos[i].y = grid_center.y + r * sinf(a);
   }
 
-  for (int32_t y = 0; y < GN; y += 1) {
-    for (int32_t x = 0; x < GN; x += 1) {
-      gg[y][x] = 0;
+  for (int32_t y = 0; y < GRID_N; y += 1) {
+    for (int32_t x = 0; x < GRID_N; x += 1) {
+      grid_counts[y][x] = 0;
     }
   }
 
-  data_vis = false;
   data_idx = 0;
-}
-
-static void
-cgr_draw_lerp_factor(void)
-{
-  char buf[20] = {0};
-  snprintf(buf, sizeof(buf), "LF=%.2f", lerp_factor);
-  DrawText(buf, 10, 10, 30, GRAY);
+  data_vis = false;
 }
 
 static void
 cgr_draw_grid(void)
 {
   float smax = 0.0f;
-  for (int32_t y = 0; y < GN; y += 1) {
-    for (int32_t x = 0; x < GN; x += 1) {
-      float s = logf(1.0f + gg[y][x]);
+  for (int32_t y = 0; y < GRID_N; y += 1) {
+    for (int32_t x = 0; x < GRID_N; x += 1) {
+      float s = logf(1.0f + grid_counts[y][x]);
       if (s > smax) smax = s;
     }
   }
 
-  for (int32_t y = 0; y < GN; y += 1) {
-    for (int32_t x = 0; x < GN; x += 1) {
-      float s = logf(1.0f + gg[y][x]);
+  for (int32_t y = 0; y < GRID_N; y += 1) {
+    for (int32_t x = 0; x < GRID_N; x += 1) {
+      float s = logf(1.0f + grid_counts[y][x]);
       Color c = BLACK;
       c.a = (uint8_t)(s / smax * 255.0f);
 
-      Vector2 rp = {gp.x + x * GPPC, gp.y + y * GPPC};
-      Vector2 rs = {GPPC, GPPC};
+      Vector2 rp = {
+        grid_pos.x + x * GRID_PIXELS_PER_CELL,
+        grid_pos.y + y * GRID_PIXELS_PER_CELL,
+      };
+      Vector2 rs = {
+        GRID_PIXELS_PER_CELL,
+        GRID_PIXELS_PER_CELL,
+      };
       DrawRectangleV(rp, rs, c);
     }
   }
@@ -121,11 +116,11 @@ static void
 cgr_draw_letters(void)
 {
   for (int32_t i = 0; i < 256; i += 1) {
-    if (vb[i] == 0) continue;
+    if (letter_set[i] == 0) continue;
 
-    char buf[20] = {0};
+    char buf[32] = {0};
     snprintf(buf, sizeof(buf), "%02x", i);
-    Vector2 pos = Vector2Lerp(gc, bp[i], 1.07);
+    Vector2 pos = Vector2Lerp(grid_center, letter_pos[i], 1.07);
     DrawText(buf, pos.x - 7.5f, pos.y - 15.0f, 10.0f, GRAY);
   }
 }
@@ -135,30 +130,36 @@ cgr_draw_letters(void)
 static void
 cgr_export_screen(void)
 {
-  static int32_t n = 0;
-  char path[30] = {0};
-  snprintf(path, sizeof(path), "img-%03d.png", n);
-  assert(ExportImage(LoadImageFromScreen(), path));
-  n += 1;
+  assert(ExportImage(LoadImageFromScreen(), "image.png"));
 }
 
 static void
 cgr_vis_step(void)
 {
-  for (int32_t i = 0; i < VIS_STEP_ITER; i += 1) {
+  for (int32_t i = 0; i < VIS_STEPS_PER_ITER; i += 1) {
     if (!data_vis) return;
-    if (lerp_factor > 1.0f) return;
-    if (data_idx >= data_len) { go_next = true; return; }
-    if (vb[data[data_idx]] == 0) { data_idx += 1; continue; }
+    if (data_idx >= data_len) return;
+    if (letter_set[data[data_idx]] == 0) { data_idx += 1; continue; }
 
-    pc = Vector2Lerp(pc, bp[data[data_idx]], lerp_factor);
+    point_pos = Vector2Lerp(point_pos, letter_pos[data[data_idx]], 0.5f);
     data_idx += 1;
 
-    Vector2 p = Vector2Subtract(pc, gp);
-    int32_t i = (int32_t)(p.y / GPPC);
-    int32_t j = (int32_t)(p.x / GPPC);
-    gg[i][j] += 1;
+    Vector2 p = Vector2Subtract(point_pos, grid_pos);
+    int32_t i = (int32_t)(p.y / GRID_PIXELS_PER_CELL);
+    int32_t j = (int32_t)(p.x / GRID_PIXELS_PER_CELL);
+    grid_counts[i][j] += 1;
   }
+}
+
+static void
+cgr_draw_vis_progress(void)
+{
+  char buf[32] = {0};
+  snprintf(
+    buf, sizeof(buf), "vis: %6.2f%%",
+    (float)data_idx / data_len * 100.0f
+  );
+  DrawText(buf, 10.0f, 10.0f, 20.0f, GRAY);
 }
 
 static void
@@ -207,34 +208,29 @@ main(int argc, char** argv)
     exit(1);
   }
 
-  cgr_init();
   cgr_read_sample(argv[1]);
+  cgr_init();
 
   SetConfigFlags(FLAG_VSYNC_HINT);
-  InitWindow(SW, SH, "CGR");
+  InitWindow(WINDOW_W, WINDOW_H, "CGR");
 
   while (!WindowShouldClose()) {
     if (IsKeyPressed(KEY_SPACE)) {
       data_vis = !data_vis;
+    }
+    if (IsKeyPressed(KEY_E)) {
+      cgr_export_screen();
     }
 
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
     cgr_vis_step();
-    // cgr_draw_lerp_factor();
     cgr_draw_grid();
     cgr_draw_letters();
+    cgr_draw_vis_progress();
 
     EndDrawing();
-
-    if (reset_on_next && go_next) {
-      cgr_export_screen();
-      cgr_init();
-      lerp_factor += 0.01f;
-      data_vis = true;
-      go_next = false;
-    }
   }
 
   CloseWindow();
