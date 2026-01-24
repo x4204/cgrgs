@@ -1,9 +1,110 @@
   file: n001.txt
+  name: Human hemoglobin-related sequence
 source: https://www.ncbi.nlm.nih.gov/nuccore/M37467.1
 
   file: n002.txt
+  name: Human beta globin
 source: https://www.ncbi.nlm.nih.gov/nuccore/U01317.1
 
   file: n003.txt
+  name: Lynx pardinus
 source: https://www.ncbi.nlm.nih.gov/nuccore/CAAGRJ010000001.1
   note: removed `n`
+
+  file: n004.txt
+  name: Gigaspora margarita
+source: https://www.ncbi.nlm.nih.gov/nuccore/WTPW01000001.1
+
+  file: n005.txt
+  name: Funneliformis mosseae
+source: https://www.ncbi.nlm.nih.gov/nuccore/CAJVPP010000001.1
+
+  file: n006.txt
+  name: Amanita muscaria
+source: https://www.ncbi.nlm.nih.gov/nuccore/JBTLHQ010000001.1
+
+  file: n007.txt
+  name: Parus major
+source: https://www.ncbi.nlm.nih.gov/nuccore/CM003734.1
+
+  file: n008.txt
+  name: Cyanocitta cristata
+source: https://www.ncbi.nlm.nih.gov/nuccore/JBJCII010000044.1
+
+  file: n009.txt
+  name: Passer domesticus
+source: https://www.ncbi.nlm.nih.gov/nuccore/CM071496.1
+
+  file: n010.txt
+  name: Bacillus anthracis
+source: https://www.ncbi.nlm.nih.gov/nuccore/NZ_JBIXFT010000001.1
+
+  file: n011.txt
+  name: Halothiobacillus neapolitanus
+source: https://www.ncbi.nlm.nih.gov/nuccore/SNVZ01000001.1
+
+  file: n012.txt
+  name: Bienertia sinuspersici
+source: https://www.ncbi.nlm.nih.gov/nuccore/JBINKH010007021.1
+
+  file: n013.txt
+  name: Escherichia coli
+source: https://www.ncbi.nlm.nih.gov/nuccore/BNGC01000002.1
+
+  file: n014.txt
+  name: Diphylla ecaudata
+source: https://www.ncbi.nlm.nih.gov/nuccore/KU743911.1
+
+  file: n015.txt
+  name: TP53 - tumor protein p53
+source: https://www.ncbi.nlm.nih.gov/datasets/gene/7157/
+
+  file: n016.txt
+  name: Batillaria attramentaria
+source: https://www.ncbi.nlm.nih.gov/nuccore/JACVVK020000094.1
+
+  file: n017.txt
+  name: Drosophila melanogaster
+source: https://www.ncbi.nlm.nih.gov/nuccore/CM035029.1
+
+  file: n018.txt
+  name: sars-cov-2
+source: https://www.ncbi.nlm.nih.gov/nuccore/OV039277.1
+
+  file: n019.txt
+  name: Human herpesvirus
+source: https://www.ncbi.nlm.nih.gov/nuccore/KM355709.1
+
+  file: n020.txt
+  name: Milnesium tardigradum
+source: https://www.ncbi.nlm.nih.gov/nuccore/EZ760011.1
+
+  file: n021.txt
+  name: Triticum aestivum
+source: https://www.ncbi.nlm.nih.gov/nuccore/FN564426.1
+
+  file: n022.txt
+  name: Carnegiea gigantea
+source: https://www.ncbi.nlm.nih.gov/nuccore/JAKOGI010000017.1
+
+  file: n023.txt
+  name: Lunularia cruciata
+source: https://www.ncbi.nlm.nih.gov/nuccore/OX419763.1
+
+  file: n024.txt
+  name: Palmaria palmata
+source: https://www.ncbi.nlm.nih.gov/nuccore/KX284726.1
+
+  file: n025.txt
+  name: Felis catus
+source: https://www.ncbi.nlm.nih.gov/nuccore/GG658445.1
+
+  file: n026.txt
+  name: Chrysaora fuscescens
+source: https://www.ncbi.nlm.nih.gov/datasets/taxonomy/880219/
+  note: only the first ~1.7M
+
+  file: n027.txt
+  name: Cornu aspersum
+source: https://www.ncbi.nlm.nih.gov/nuccore/OZ076470.1
+  note: only the first ~2M

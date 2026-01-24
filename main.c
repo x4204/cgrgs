@@ -19,19 +19,85 @@
 
 #define GRID_W 800
 #define GRID_H GRID_W
-#define GRID_N 100
+#define GRID_N 400
 #define GRID_PIXELS_PER_CELL ((float)GRID_W / GRID_N)
 
 #define VIS_STEPS_PER_ITER 100000
+
+#define N_CORNERS 4
+
+static Vector2 corner_pos[N_CORNERS] = {0};
+static uint8_t corner_map[256] = {
+  [ 65] = 0, [ 67] = 1, [ 71] = 2, [ 84] = 3,
+  [ 97] = 0, [ 99] = 1, [103] = 2, [116] = 3,
+  [  0] = 0, [  1] = 1, [  2] = 2, [  3] = 3,
+  [  4] = 0, [  5] = 1, [  6] = 2, [  7] = 3,
+  [  8] = 0, [  9] = 1, [ 10] = 2, [ 11] = 3,
+  [ 12] = 0, [ 13] = 1, [ 14] = 2, [ 15] = 3,
+  [ 16] = 0, [ 17] = 1, [ 18] = 2, [ 19] = 3,
+  [ 20] = 0, [ 21] = 1, [ 22] = 2, [ 23] = 3,
+  [ 24] = 0, [ 25] = 1, [ 26] = 2, [ 27] = 3,
+  [ 28] = 0, [ 29] = 1, [ 30] = 2, [ 31] = 3,
+  [ 32] = 0, [ 33] = 1, [ 34] = 2, [ 35] = 3,
+  [ 36] = 0, [ 37] = 1, [ 38] = 2, [ 39] = 3,
+  [ 40] = 0, [ 41] = 1, [ 42] = 2, [ 43] = 3,
+  [ 44] = 0, [ 45] = 1, [ 46] = 2, [ 47] = 3,
+  [ 48] = 0, [ 49] = 1, [ 50] = 2, [ 51] = 3,
+  [ 52] = 0, [ 53] = 1, [ 54] = 2, [ 55] = 3,
+  [ 56] = 0, [ 57] = 1, [ 58] = 2, [ 59] = 3,
+  [ 60] = 0, [ 61] = 1, [ 62] = 2, [ 63] = 3,
+  [ 64] = 0, [ 66] = 1, [ 68] = 2, [ 69] = 3,
+  [ 70] = 0, [ 72] = 1, [ 73] = 2, [ 74] = 3,
+  [ 75] = 0, [ 76] = 1, [ 77] = 2, [ 78] = 3,
+  [ 79] = 0, [ 80] = 1, [ 81] = 2, [ 82] = 3,
+  [ 83] = 0, [ 85] = 1, [ 86] = 2, [ 87] = 3,
+  [ 88] = 0, [ 89] = 1, [ 90] = 2, [ 91] = 3,
+  [ 92] = 0, [ 93] = 1, [ 94] = 2, [ 95] = 3,
+  [ 96] = 0, [ 98] = 1, [100] = 2, [101] = 3,
+  [102] = 0, [104] = 1, [105] = 2, [106] = 3,
+  [107] = 0, [108] = 1, [109] = 2, [110] = 3,
+  [111] = 0, [112] = 1, [113] = 2, [114] = 3,
+  [115] = 0, [117] = 1, [118] = 2, [119] = 3,
+  [120] = 0, [121] = 1, [122] = 2, [123] = 3,
+  [124] = 0, [125] = 1, [126] = 2, [127] = 3,
+  [128] = 0, [129] = 1, [130] = 2, [131] = 3,
+  [132] = 0, [133] = 1, [134] = 2, [135] = 3,
+  [136] = 0, [137] = 1, [138] = 2, [139] = 3,
+  [140] = 0, [141] = 1, [142] = 2, [143] = 3,
+  [144] = 0, [145] = 1, [146] = 2, [147] = 3,
+  [148] = 0, [149] = 1, [150] = 2, [151] = 3,
+  [152] = 0, [153] = 1, [154] = 2, [155] = 3,
+  [156] = 0, [157] = 1, [158] = 2, [159] = 3,
+  [160] = 0, [161] = 1, [162] = 2, [163] = 3,
+  [164] = 0, [165] = 1, [166] = 2, [167] = 3,
+  [168] = 0, [169] = 1, [170] = 2, [171] = 3,
+  [172] = 0, [173] = 1, [174] = 2, [175] = 3,
+  [176] = 0, [177] = 1, [178] = 2, [179] = 3,
+  [180] = 0, [181] = 1, [182] = 2, [183] = 3,
+  [184] = 0, [185] = 1, [186] = 2, [187] = 3,
+  [188] = 0, [189] = 1, [190] = 2, [191] = 3,
+  [192] = 0, [193] = 1, [194] = 2, [195] = 3,
+  [196] = 0, [197] = 1, [198] = 2, [199] = 3,
+  [200] = 0, [201] = 1, [202] = 2, [203] = 3,
+  [204] = 0, [205] = 1, [206] = 2, [207] = 3,
+  [208] = 0, [209] = 1, [210] = 2, [211] = 3,
+  [212] = 0, [213] = 1, [214] = 2, [215] = 3,
+  [216] = 0, [217] = 1, [218] = 2, [219] = 3,
+  [220] = 0, [221] = 1, [222] = 2, [223] = 3,
+  [224] = 0, [225] = 1, [226] = 2, [227] = 3,
+  [228] = 0, [229] = 1, [230] = 2, [231] = 3,
+  [232] = 0, [233] = 1, [234] = 2, [235] = 3,
+  [236] = 0, [237] = 1, [238] = 2, [239] = 3,
+  [240] = 0, [241] = 1, [242] = 2, [243] = 3,
+  [244] = 0, [245] = 1, [246] = 2, [247] = 3,
+  [248] = 0, [249] = 1, [250] = 2, [251] = 3,
+  [252] = 0, [253] = 1, [254] = 2, [255] = 3,
+};
 
 static uint8_t* data = NULL;
 static int32_t data_len = 0;
 static int32_t data_idx = 0;
 static bool data_vis = false;
-
-static Vector2 letter_pos[256] = {0};
-static int8_t letter_set[256] = {0};
-static int32_t letter_set_cnt = 0;
 
 static Vector2 grid_pos = {0};
 static Vector2 grid_center = {0};
@@ -51,26 +117,18 @@ cgr_init(void)
 
   point_pos = grid_center;
 
-  for (int32_t i = 0; i < 256; i += 1) {
-    letter_set[i] = 0;
-  }
-  for (int32_t i = 0; i < data_len; i += 1) {
-    letter_set[data[i]] = 1;
-  }
-  letter_set_cnt = 0;
-  for (int32_t i = 0; i < 256; i += 1) {
-    if (letter_set[i] == 1) letter_set_cnt += 1;
-  }
+  for (int32_t i = 0; i < N_CORNERS; i += 1) {
+    corner_pos[1].x = grid_pos.x;
+    corner_pos[1].y = grid_pos.y;
 
-  for (int32_t i = 0, j = 0; i < 256; i += 1) {
-    if (letter_set[i] == 0) continue;
-    float s = 360.0f / letter_set_cnt;
-    float r = GRID_W / 2;
-    float a = (90.0f + s / 2 + j * s) * DEG2RAD;
+    corner_pos[0].x = corner_pos[1].x;
+    corner_pos[0].y = corner_pos[1].y + GRID_H;
 
-    j += 1;
-    letter_pos[i].x = grid_center.x + r * cosf(a);
-    letter_pos[i].y = grid_center.y + r * sinf(a);
+    corner_pos[2].x = corner_pos[1].x + GRID_W;
+    corner_pos[2].y = corner_pos[1].y;
+
+    corner_pos[3].x = corner_pos[1].x + GRID_W;
+    corner_pos[3].y = corner_pos[1].y + GRID_H;
   }
 
   for (int32_t y = 0; y < GRID_N; y += 1) {
@@ -114,15 +172,13 @@ cgr_draw_grid(void)
 }
 
 static void
-cgr_draw_letters(void)
+cgr_draw_corners(void)
 {
-  for (int32_t i = 0; i < 256; i += 1) {
-    if (letter_set[i] == 0) continue;
-
+  for (int32_t i = 0; i < N_CORNERS; i += 1) {
     char buf[32] = {0};
-    snprintf(buf, sizeof(buf), "%02x", i);
-    Vector2 pos = Vector2Lerp(grid_center, letter_pos[i], 1.07);
-    DrawText(buf, pos.x - 7.5f, pos.y - 15.0f, 10.0f, GRAY);
+    snprintf(buf, sizeof(buf), "%d", i);
+    Vector2 pos = Vector2Lerp(grid_center, corner_pos[i], 1.07);
+    DrawText(buf, pos.x - 7.5f, pos.y - 15.0f, 20.0f, GRAY);
   }
 }
 
@@ -140,9 +196,8 @@ cgr_vis_step(void)
   for (int32_t i = 0; i < VIS_STEPS_PER_ITER; i += 1) {
     if (!data_vis) return;
     if (data_idx >= data_len) return;
-    if (letter_set[data[data_idx]] == 0) { data_idx += 1; continue; }
 
-    Vector2 attr_pos = letter_pos[data[data_idx]];
+    Vector2 attr_pos = corner_pos[corner_map[data[data_idx]]];
     point_pos = Vector2Lerp(point_pos, attr_pos, jump_ratio);
     data_idx += 1;
 
@@ -242,7 +297,7 @@ main(int argc, char** argv)
 
     cgr_vis_step();
     cgr_draw_grid();
-    cgr_draw_letters();
+    cgr_draw_corners();
     cgr_draw_debug_info();
 
     EndDrawing();
